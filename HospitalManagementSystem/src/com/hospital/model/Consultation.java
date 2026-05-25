@@ -14,8 +14,13 @@ public class Consultation {
     private String preferredDate;  // ISO date string
     private String notes;
     private String status;
+    /** Populated by joins for display only (not stored in Consultation table). */
+    private String patientName;
 
     public Consultation() { }
+
+    public String getPatientName() { return patientName; }
+    public void setPatientName(String patientName) { this.patientName = patientName; }
 
     public int getConsultationId() { return consultationId; }
     public void setConsultationId(int consultationId) { this.consultationId = consultationId; }

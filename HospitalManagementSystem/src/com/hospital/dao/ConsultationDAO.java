@@ -49,6 +49,48 @@ public class ConsultationDAO {
         return out;
     }
 
+    /**
+     * Admin view: every consultation across all patients, joined with the
+     * patient name. Most recent first.
+     */
+    public List<Consultation> findAll() throws SQLException {
+        String sql = "SELECT c.ConsultationId, c.PatientId, c.DoctorName, c.Department, " +
+                "c.PreferredDate, c.Notes, c.Status, p.PatientName " +
+                "FROM Consultation c LEFT JOIN Patient p ON c.PatientId = p.PatientId " +
+                "ORDER BY c.ConsultationId DESC";
+        List<Consultation> out = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Consultation c = read(rs);
+                c.setPatientName(rs.getString("PatientName"));
+                out.add(c);
+            }
+        }
+        return out;
+    }
+
+    /** Admin action: update the workflow status of a consultation request. */
+    public boolean updateStatus(int consultationId, String status) throws SQLException {
+        if (!isValidStatus(status)) {
+            throw new IllegalArgumentException("Invalid status: " + status);
+        }
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "UPDATE Consultation SET Status=? WHERE ConsultationId=?")) {
+            ps.setString(1, status);
+            ps.setInt(2, consultationId);
+            return ps.executeUpdate() == 1;
+        }
+    }
+
+    public static boolean isValidStatus(String status) {
+        return Consultation.STATUS_PENDING.equals(status)
+            || Consultation.STATUS_CONFIRMED.equals(status)
+            || Consultation.STATUS_COMPLETED.equals(status);
+    }
+
     private Consultation read(ResultSet rs) throws SQLException {
         Consultation c = new Consultation();
         c.setConsultationId(rs.getInt("ConsultationId"));

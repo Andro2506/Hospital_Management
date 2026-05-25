@@ -64,6 +64,11 @@
         <h3>Search Bill</h3>
         <p>By Email or PRN (polymorphic).</p>
     </a>
+    <a class="tile" href="<%= request.getContextPath() %>/viewConsultations">
+        <div class="icon">&#128197;</div>
+        <h3>View Consultations</h3>
+        <p>All consultation requests across patients.</p>
+    </a>
     <a class="tile" href="<%= request.getContextPath() %>/logout">
         <div class="icon">&#10162;</div>
         <h3>Logout</h3>
