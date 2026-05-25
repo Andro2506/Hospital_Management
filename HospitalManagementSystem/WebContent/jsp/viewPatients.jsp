@@ -8,7 +8,7 @@
     }
     request.setAttribute("pageTitle", "View Patients");
     List<Patient> patients = (List<Patient>) request.getAttribute("patients");
-    Integer page = (Integer) request.getAttribute("page");
+    Integer currentPage = (Integer) request.getAttribute("page");
     Integer totalPages = (Integer) request.getAttribute("totalPages");
     Integer total = (Integer) request.getAttribute("total");
     Integer pageSize = (Integer) request.getAttribute("pageSize");
@@ -17,7 +17,7 @@
 
 <h1 class="page-title">All Active Patients</h1>
 <p class="subtle">
-    Showing page <%= page %> of <%= totalPages %> &middot;
+    Showing page <%= currentPage %> of <%= totalPages %> &middot;
     <%= total %> total record<%= total == 1 ? "" : "s" %> &middot;
     <%= pageSize %> per page.
 </p>
@@ -69,16 +69,16 @@
     </div>
 
     <div class="pagination">
-        <% if (page > 1) { %>
-            <a href="?page=<%= page - 1 %>">&laquo; Prev</a>
+        <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>">&laquo; Prev</a>
         <% } else { %>
             <span class="disabled">&laquo; Prev</span>
         <% } %>
         <%
-            int from = Math.max(1, page - 2);
-            int to   = Math.min(totalPages, page + 2);
+            int from = Math.max(1, currentPage - 2);
+            int to   = Math.min(totalPages, currentPage + 2);
             for (int i = from; i <= to; i++) {
-                if (i == page) {
+                if (i == currentPage) {
         %>
             <span class="current"><%= i %></span>
         <%      } else { %>
@@ -86,8 +86,8 @@
         <%      }
             }
         %>
-        <% if (page < totalPages) { %>
-            <a href="?page=<%= page + 1 %>">Next &raquo;</a>
+        <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
         <% } else { %>
             <span class="disabled">Next &raquo;</span>
         <% } %>

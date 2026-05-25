@@ -10,10 +10,10 @@
     request.setAttribute("pageTitle", "Hospital Facilities");
 
     List<Facility> rows = (List<Facility>) request.getAttribute("facilities");
-    Integer page       = (Integer) request.getAttribute("page");
-    Integer totalPages = (Integer) request.getAttribute("totalPages");
-    Integer total      = (Integer) request.getAttribute("total");
-    Integer pageSize   = (Integer) request.getAttribute("pageSize");
+    Integer currentPage = (Integer) request.getAttribute("page");
+    Integer totalPages  = (Integer) request.getAttribute("totalPages");
+    Integer total       = (Integer) request.getAttribute("total");
+    Integer pageSize    = (Integer) request.getAttribute("pageSize");
 
     // Group by department for the current page slice.
     Map<String, List<Facility>> byDept = new LinkedHashMap<>();
@@ -27,7 +27,7 @@
 
 <h1 class="page-title">Our Facilities</h1>
 <p class="subtle">
-    Page <%= page %> of <%= totalPages %> &middot;
+    Page <%= currentPage %> of <%= totalPages %> &middot;
     <%= total %> facility entries &middot; <%= pageSize %> per page.
 </p>
 
@@ -51,16 +51,16 @@
 <% } %>
 
 <div class="pagination">
-    <% if (page > 1) { %>
-        <a href="?page=<%= page - 1 %>">&laquo; Prev</a>
+    <% if (currentPage > 1) { %>
+        <a href="?page=<%= currentPage - 1 %>">&laquo; Prev</a>
     <% } else { %>
         <span class="disabled">&laquo; Prev</span>
     <% } %>
     <%
-        int from = Math.max(1, page - 2);
-        int to   = Math.min(totalPages, page + 2);
+        int from = Math.max(1, currentPage - 2);
+        int to   = Math.min(totalPages, currentPage + 2);
         for (int i = from; i <= to; i++) {
-            if (i == page) {
+            if (i == currentPage) {
     %>
         <span class="current"><%= i %></span>
     <%      } else { %>
@@ -68,8 +68,8 @@
     <%      }
         }
     %>
-    <% if (page < totalPages) { %>
-        <a href="?page=<%= page + 1 %>">Next &raquo;</a>
+    <% if (currentPage < totalPages) { %>
+        <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
     <% } else { %>
         <span class="disabled">Next &raquo;</span>
     <% } %>
