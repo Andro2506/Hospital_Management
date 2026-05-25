@@ -1,0 +1,29 @@
+# Build output
+build/
+target/
+out/
+classes/
+*.class
+*.war
+
+# Editor / IDE
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+
+# Local DB and logs
+*.db
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Local helper folders
+.tmp/
+
+# Downloaded JARs (the user must run download-deps.sh or fetch manually)
+HospitalManagementSystem/WebContent/WEB-INF/lib/*.jar

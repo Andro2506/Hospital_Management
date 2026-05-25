@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                             http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+
+    <display-name>Hospital Management System</display-name>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+    <!--
+      Servlets are mapped via @WebServlet annotations:
+        /login, /logout, /addPatient, /editPatient, /deletePatient,
+        /viewPatients, /searchPatient, /deleteByMobile,
+        /visitorRegister, /visitorLogin, /visitorLogout,
+        /viewFacilities, /registerComplaint,
+        /registerLabTest, /viewLabTests, /viewBills, /searchBill
+      The DBInitListener is also auto-registered via @WebListener.
+    -->
+
+    <error-page>
+        <exception-type>java.lang.Throwable</exception-type>
+        <location>/jsp/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/jsp/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/jsp/error.jsp</location>
+    </error-page>
+</web-app>
