@@ -13,16 +13,27 @@ plain Servlets and JSP, backed by SQLite. No Spring, no Maven.
 | JDBC driver  | `sqlite-jdbc-3.27.2.jar`                          |
 | Frontend     | Plain HTML/CSS/JavaScript (vanilla)               |
 
+## User Roles
+
+- **Admin** - manages patient records, books lab tests, reviews all bills.
+- **Patient** - self-registers, logs in, views and edits own details, sees
+  own lab tests, requests a doctor consultation, sees own bills.
+
+(There is no separate "visitor" role any more; visitor login/registration was
+replaced by patient login/registration.)
+
 ## Repository Layout
 
 ```
 HospitalManagementSystem/
 ├── src/com/hospital/
-│   ├── model/           Patient, Admin, Visitor, Lab, Bill, Complaint
-│   ├── dao/             PatientDAO, AdminDAO, VisitorDAO, LabDAO,
-│   │                    BillDAO, ComplaintDAO, PatientCollection
-│   ├── servlet/         All servlets (Login, Add/Edit/Delete/View/Search,
-│   │                    Visitor Login/Register, Lab/Bill, Logout)
+│   ├── model/           Patient, Admin, Lab, Bill, Consultation
+│   ├── dao/             PatientDAO, AdminDAO, LabDAO, BillDAO,
+│   │                    ConsultationDAO, PatientCollection
+│   ├── servlet/         Admin: Login/Logout, Add/Edit/Delete/View/Search
+│   │                    Patient: Login/Register/Logout, Profile,
+│   │                             MyLabTests, MyBills, RegisterConsultation
+│   │                    Shared: RegisterLabTest, ViewLabTests, ViewBills, SearchBill
 │   └── util/            DBConnection, DBInitListener, ValidationUtil
 ├── WebContent/
 │   ├── WEB-INF/
@@ -50,11 +61,7 @@ cd HospitalManagementSystem
 
 Or download it manually from
 [Maven Central](https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.27.2/sqlite-jdbc-3.27.2.jar)
-and drop the file into `HospitalManagementSystem/WebContent/WEB-INF/lib/`.
-
-> The sandbox where this project was scaffolded had no public internet access, so
-> the JAR is not bundled with the source. Once placed in `WEB-INF/lib/`, Tomcat
-> picks it up automatically at startup.
+and drop it into `HospitalManagementSystem/WebContent/WEB-INF/lib/`.
 
 ### 2. Build and deploy
 
@@ -82,35 +89,26 @@ Open <http://localhost:8080/hms/> after Tomcat starts.
 ### 3. First-time data seeding
 
 On first request the `DBInitListener` will:
+
 - create `hospital.db` next to the deployed web app,
-- create all 6 tables (`Patient`, `Admin`, `Visitor`, `Lab`, `Bills`, `Complaint`),
-- insert the default admin: `admin` / `Admin@123`,
-- insert 10 demo patient records (PRNs `1000001` ... `1000010`).
+- create all tables (`Patient`, `Admin`, `Lab`, `Bills`, `Consultation`),
+- migrate older databases by adding `Username` / `Password` columns to
+  `Patient` if they are missing,
+- drop the legacy `Visitor` and `Complaint` tables if present,
+- seed the default admin (`admin001` / `Admin@123`),
+- seed 10 demo patient records, with login credentials on the first three
+  (`patient001`, `patient002`, `patient003` &mdash; all `Patient@123`).
 
-> **Login note:** the seeded admin username is `admin001` (8 chars) so the
-> default credentials pass the validation rule (alphanumeric, min 8 chars).
-> Use `admin001` / `Admin@123` for your first login.
+## Default credentials
 
-## User Stories &rarr; Implementation Map
+| Role    | Username     | Password      |
+|---------|--------------|---------------|
+| Admin   | `admin001`   | `Admin@123`   |
+| Patient | `patient001` | `Patient@123` |
+| Patient | `patient002` | `Patient@123` |
+| Patient | `patient003` | `Patient@123` |
 
-| Story | Servlet                          | JSP                  |
-|-------|----------------------------------|----------------------|
-| US001 | `LoginServlet` / `LogoutServlet` | `login.jsp`          |
-| US002 | `AddPatientServlet`              | `addPatient.jsp`     |
-| US003 | `EditPatientServlet`             | `editPatient.jsp`    |
-| US004 | `DeletePatientServlet`           | `deletePatient.jsp`  |
-| US005 | `ViewPatientsServlet`            | `viewPatients.jsp`   |
-| US006 | `SearchPatientServlet`           | `searchPatient.jsp`  |
-| US007 | `DeleteByMobileServlet`          | `deleteByMobile.jsp` |
-| US008 | `VisitorRegisterServlet`         | `visitorRegister.jsp`|
-| US009 | `VisitorLoginServlet`            | `visitorLogin.jsp`   |
-| US010 | `ViewFacilitiesServlet`          | `viewFacilities.jsp` |
-| US011 | `RegisterComplaintServlet`       | `registerComplaint.jsp` |
-| US001-Collection | `PatientCollection` (mirrored from `AddPatient`/`Delete`) | uses existing screens |
-| US002-Exception  | All servlets catch &rarr; `error.jsp`            | `error.jsp` |
-| US003-PatientDetailsManagement | `RegisterLabTestServlet` (CBC / BEL) | `labRegister.jsp` |
-| US004-LabInheritance | `Bill extends Lab`, `RegisterLabTestServlet` writes both | `labRegister.jsp` |
-| US005-Polymorphism   | `BillDAO.search()` / `searchByEmail()` / `searchByPatientId()` | `searchBill.jsp` |
+Self-registered patients pick their own username and password during signup.
 
 ## Validation rules
 
@@ -123,11 +121,19 @@ Both client-side (`js/validation.js`) and server-side (`util/ValidationUtil.java
 - **Aadhar** &mdash; exactly 12 digits.
 - **Email** &mdash; standard email format.
 
-## Default credentials
+## Patient self-service flow
 
-| Role  | Username   | Password    |
-|-------|------------|-------------|
-| Admin | `admin001` | `Admin@123` |
+| Action                          | URL                          | What you see                                    |
+|---------------------------------|------------------------------|-------------------------------------------------|
+| Register                        | `/patientRegister`           | Create username + password + full patient details. |
+| Login                           | `/patientLogin`              | Sign in.                                        |
+| Dashboard                       | `/jsp/patientDashboard.jsp`  | Tile menu.                                      |
+| View my details                 | `/myProfile`                 | Read-only view of your record.                  |
+| Edit my details                 | `/myProfile/edit`            | Edit name, age, contact info, address, etc.    |
+| My lab tests                    | `/myLabTests`                | Lab tests booked against your PRN.              |
+| Register doctor consultation    | `/registerConsultation`      | Pick department + doctor + date.                |
+| My bills                        | `/myBills`                   | Bills generated for your treatments.            |
+| Logout                          | `/patientLogout`             | Ends your session.                              |
 
-The username is `admin001` (not `admin`) because the login rule requires an
-alphanumeric username with a minimum of 8 characters.
+Patients cannot edit their PRN, username, ward, or doctor assignment - those
+are administered by hospital staff via the admin screens.

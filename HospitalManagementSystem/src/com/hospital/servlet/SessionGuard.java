@@ -20,11 +20,11 @@ final class SessionGuard {
         return true;
     }
 
-    /** @return true if a visitor is logged in; otherwise sends a redirect and returns false. */
-    static boolean requireVisitor(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    /** @return true if a patient is logged in; otherwise sends a redirect and returns false. */
+    static boolean requirePatient(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession(false);
-        if (session == null || session.getAttribute("visitor") == null) {
-            resp.sendRedirect(req.getContextPath() + "/jsp/visitorLogin.jsp?expired=1");
+        if (session == null || session.getAttribute("patient") == null) {
+            resp.sendRedirect(req.getContextPath() + "/jsp/patientLogin.jsp?expired=1");
             return false;
         }
         return true;

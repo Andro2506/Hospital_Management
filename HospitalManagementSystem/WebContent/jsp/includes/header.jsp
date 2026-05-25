@@ -5,7 +5,7 @@
     if (pageTitle == null) pageTitle = "Hospital Management System";
 
     Object adminUser   = session.getAttribute("admin");
-    Object visitorUser = session.getAttribute("visitor");
+    Object patientUser = session.getAttribute("patient");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,13 +26,13 @@
         <% if (adminUser != null) { %>
             <a href="<%= ctx %>/jsp/adminDashboard.jsp">Admin Dashboard</a>
             <a href="<%= ctx %>/logout">Logout</a>
-        <% } else if (visitorUser != null) { %>
-            <a href="<%= ctx %>/jsp/visitorDashboard.jsp">Visitor Dashboard</a>
-            <a href="<%= ctx %>/visitorLogout">Logout</a>
+        <% } else if (patientUser != null) { %>
+            <a href="<%= ctx %>/jsp/patientDashboard.jsp">Patient Dashboard</a>
+            <a href="<%= ctx %>/patientLogout">Logout</a>
         <% } else { %>
             <a href="<%= ctx %>/jsp/login.jsp">Admin Login</a>
-            <a href="<%= ctx %>/jsp/visitorLogin.jsp">Visitor Login</a>
-            <a href="<%= ctx %>/jsp/visitorRegister.jsp">Register</a>
+            <a href="<%= ctx %>/jsp/patientLogin.jsp">Patient Login</a>
+            <a href="<%= ctx %>/jsp/patientRegister.jsp">Register</a>
         <% } %>
     </nav>
 </header>

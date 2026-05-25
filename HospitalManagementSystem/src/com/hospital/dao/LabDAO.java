@@ -47,22 +47,35 @@ public class LabDAO {
     }
 
     public List<Lab> findAll() throws SQLException {
-        String sql = "SELECT LabId, PatientId, TestType, Category, Weight, Height, MobileNumber " +
-                "FROM Lab ORDER BY LabId DESC";
+        return runQuery(
+                "SELECT LabId, PatientId, TestType, Category, Weight, Height, MobileNumber " +
+                "FROM Lab ORDER BY LabId DESC", null);
+    }
+
+    /** Lab tests for a single patient (used by the patient self-service screen). */
+    public List<Lab> findByPatient(String patientId) throws SQLException {
+        return runQuery(
+                "SELECT LabId, PatientId, TestType, Category, Weight, Height, MobileNumber " +
+                "FROM Lab WHERE PatientId=? ORDER BY LabId DESC", patientId);
+    }
+
+    private List<Lab> runQuery(String sql, String param) throws SQLException {
         List<Lab> out = new ArrayList<>();
         try (Connection c = DBConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Lab l = new Lab();
-                l.setLabId(rs.getInt("LabId"));
-                l.setPatientId(rs.getString("PatientId"));
-                l.setTestType(rs.getString("TestType"));
-                l.setCategory(rs.getString("Category"));
-                l.setWeight(rs.getInt("Weight"));
-                l.setHeight(rs.getInt("Height"));
-                l.setMobileNumber(rs.getString("MobileNumber"));
-                out.add(l);
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            if (param != null) ps.setString(1, param);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Lab l = new Lab();
+                    l.setLabId(rs.getInt("LabId"));
+                    l.setPatientId(rs.getString("PatientId"));
+                    l.setTestType(rs.getString("TestType"));
+                    l.setCategory(rs.getString("Category"));
+                    l.setWeight(rs.getInt("Weight"));
+                    l.setHeight(rs.getInt("Height"));
+                    l.setMobileNumber(rs.getString("MobileNumber"));
+                    out.add(l);
+                }
             }
         }
         return out;

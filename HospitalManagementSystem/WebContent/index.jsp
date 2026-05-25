@@ -5,23 +5,32 @@
 <section class="hero">
     <h1>Welcome to City Care Hospital</h1>
     <p>Your trusted partner in healthcare. Manage patient records, lab tests,
-       billing, and visitor services from a single place.</p>
+       billing, and consultations from a single place.</p>
     <div class="actions" style="justify-content:center;display:flex">
         <a class="btn btn-primary"   href="<%= request.getContextPath() %>/jsp/login.jsp">Admin Login</a>
-        <a class="btn btn-secondary" href="<%= request.getContextPath() %>/jsp/visitorLogin.jsp">Visitor Login</a>
-        <a class="btn btn-secondary" href="<%= request.getContextPath() %>/jsp/visitorRegister.jsp">Visitor Register</a>
+        <a class="btn btn-secondary" href="<%= request.getContextPath() %>/jsp/patientLogin.jsp">Patient Login</a>
+        <a class="btn btn-secondary" href="<%= request.getContextPath() %>/jsp/patientRegister.jsp">Patient Register</a>
     </div>
 </section>
 
 <section class="card">
-    <h2>About this system</h2>
-    <p>This Hospital Management System lets administrators capture, edit, search,
-       and delete patient records, register patients for lab tests (CBC / BEL),
-       and review billing details. Visitors can register, log in, browse hospital
-       facilities by department, and submit complaints to the hospital
-       management.</p>
+    <h2>For patients</h2>
+    <p>Register an account to access your records, view lab tests booked
+       under your PRN, see bills, edit your contact info, and request a
+       doctor consultation - all in one place.</p>
+</section>
+
+<section class="card">
+    <h2>For administrators</h2>
+    <p>Sign in to capture, edit, search and delete patient records,
+       register patients for lab tests (CBC / BEL), and review billing
+       details.</p>
     <p class="subtle">Default admin credentials seeded on first run:
-       <code>admin001</code> / <code>Admin@123</code>.</p>
+       <code>admin001</code> / <code>Admin@123</code>. Three demo
+       patient logins are also seeded:
+       <code>patient001</code>, <code>patient002</code>,
+       <code>patient003</code> - all with password
+       <code>Patient@123</code>.</p>
 </section>
 
 <%@ include file="/jsp/includes/footer.jsp" %>

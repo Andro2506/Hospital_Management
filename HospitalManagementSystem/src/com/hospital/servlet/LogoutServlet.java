@@ -7,8 +7,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
-/** Clears the session for both admin and visitor and redirects to home. */
-@WebServlet({"/logout", "/visitorLogout"})
+/** Clears the session for both admin and patient and redirects to home. */
+@WebServlet({"/logout", "/patientLogout"})
 public class LogoutServlet extends HttpServlet {
 
     @Override

@@ -1,7 +1,7 @@
 package com.hospital.servlet;
 
-import com.hospital.dao.VisitorDAO;
-import com.hospital.model.Visitor;
+import com.hospital.dao.PatientDAO;
+import com.hospital.model.Patient;
 import com.hospital.util.ValidationUtil;
 
 import javax.servlet.ServletException;
@@ -12,14 +12,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
-/** US009 - Visitor login. Same UserId/Password rules as admin. */
-@WebServlet("/visitorLogin")
-public class VisitorLoginServlet extends HttpServlet {
+/** Patient self-service login. Same UID / password rules as admin. */
+@WebServlet("/patientLogin")
+public class PatientLoginServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.getRequestDispatcher("/jsp/visitorLogin.jsp").forward(req, resp);
+        req.getRequestDispatcher("/jsp/patientLogin.jsp").forward(req, resp);
     }
 
     @Override
@@ -30,27 +30,27 @@ public class VisitorLoginServlet extends HttpServlet {
 
         if (!ValidationUtil.isUserId(userId)) {
             req.setAttribute("loginError", "User ID must be alphanumeric and at least 8 characters.");
-            req.getRequestDispatcher("/jsp/visitorLogin.jsp").forward(req, resp);
+            req.getRequestDispatcher("/jsp/patientLogin.jsp").forward(req, resp);
             return;
         }
         if (!ValidationUtil.isPassword(pwd)) {
             req.setAttribute("loginError", "Password must be at least 10 characters and include "
                     + "an uppercase letter, a number, and a special character.");
-            req.getRequestDispatcher("/jsp/visitorLogin.jsp").forward(req, resp);
+            req.getRequestDispatcher("/jsp/patientLogin.jsp").forward(req, resp);
             return;
         }
 
         try {
-            Visitor v = new VisitorDAO().authenticate(userId, pwd);
-            if (v == null) {
+            Patient p = new PatientDAO().authenticate(userId, pwd);
+            if (p == null) {
                 req.setAttribute("loginError", "Invalid credentials. Please try again.");
-                req.getRequestDispatcher("/jsp/visitorLogin.jsp").forward(req, resp);
+                req.getRequestDispatcher("/jsp/patientLogin.jsp").forward(req, resp);
                 return;
             }
             HttpSession session = req.getSession(true);
-            session.setAttribute("visitor", v);
-            session.setAttribute("flash", "Welcome, " + v.getFirstName() + "!");
-            resp.sendRedirect(req.getContextPath() + "/jsp/visitorDashboard.jsp");
+            session.setAttribute("patient", p);
+            session.setAttribute("flash", "Welcome back, " + p.getPatientName() + "!");
+            resp.sendRedirect(req.getContextPath() + "/jsp/patientDashboard.jsp");
         } catch (Exception e) {
             req.setAttribute("errorMessage", "Login failed: " + e.getMessage());
             req.getRequestDispatcher("/jsp/error.jsp").forward(req, resp);

@@ -15,10 +15,12 @@ public class PatientDAO {
 
     private static final String COLS =
             "PatientId, PatientName, Email, Age, BloodGroup, PatientDOB, Gender, " +
-            "WardNumber, DoctorId, DoctorName, Address, ContactNo, AadharNumber";
+            "WardNumber, DoctorId, DoctorName, Address, ContactNo, AadharNumber, " +
+            "Username, Password";
 
+    /** Insert a new patient row (admin-created or self-registered). */
     public boolean insert(Patient p) throws SQLException {
-        String sql = "INSERT INTO Patient (" + COLS + ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO Patient (" + COLS + ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             bind(ps, p);
@@ -26,6 +28,11 @@ public class PatientDAO {
         }
     }
 
+    /**
+     * Admin update path: refreshes every editable column except the PRN,
+     * Username and Password. Useful when an admin is editing an admin-created
+     * patient and is not touching the login fields.
+     */
     public boolean update(Patient p) throws SQLException {
         String sql = "UPDATE Patient SET PatientName=?, Email=?, Age=?, BloodGroup=?, " +
                 "PatientDOB=?, Gender=?, WardNumber=?, DoctorId=?, DoctorName=?, " +
@@ -49,6 +56,31 @@ public class PatientDAO {
         }
     }
 
+    /**
+     * Patient self-update path: a logged-in patient may edit their personal
+     * details, but PRN, Username, Password, Ward, DoctorId and DoctorName are
+     * managed by hospital staff and cannot be changed here.
+     */
+    public boolean selfUpdate(Patient p) throws SQLException {
+        String sql = "UPDATE Patient SET PatientName=?, Email=?, Age=?, BloodGroup=?, " +
+                "PatientDOB=?, Gender=?, Address=?, ContactNo=?, AadharNumber=? " +
+                "WHERE PatientId=?";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, p.getPatientName());
+            ps.setString(2, p.getEmail());
+            ps.setInt   (3, p.getAge());
+            ps.setString(4, p.getBloodGroup());
+            ps.setString(5, p.getPatientDOB());
+            ps.setString(6, p.getGender());
+            ps.setString(7, p.getAddress());
+            ps.setString(8, p.getContactNo());
+            ps.setString(9, p.getAadharNumber());
+            ps.setString(10, p.getPatientId());
+            return ps.executeUpdate() == 1;
+        }
+    }
+
     public boolean deleteById(String patientId) throws SQLException {
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement("DELETE FROM Patient WHERE PatientId=?")) {
@@ -66,23 +98,45 @@ public class PatientDAO {
     }
 
     public Patient findById(String patientId) throws SQLException {
-        String sql = "SELECT " + COLS + " FROM Patient WHERE PatientId=?";
-        try (Connection c = DBConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, patientId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? readRow(rs) : null;
-            }
-        }
+        return querySingle("SELECT " + COLS + " FROM Patient WHERE PatientId=?", patientId);
     }
 
     public Patient findByEmail(String email) throws SQLException {
-        String sql = "SELECT " + COLS + " FROM Patient WHERE Email=?";
+        return querySingle("SELECT " + COLS + " FROM Patient WHERE Email=?", email);
+    }
+
+    public Patient findByUsername(String username) throws SQLException {
+        return querySingle("SELECT " + COLS + " FROM Patient WHERE Username=?", username);
+    }
+
+    public boolean usernameExists(String username) throws SQLException {
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT 1 FROM Patient WHERE Username=?")) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
+        }
+    }
+
+    public boolean patientIdExists(String patientId) throws SQLException {
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT 1 FROM Patient WHERE PatientId=?")) {
+            ps.setString(1, patientId);
+            try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
+        }
+    }
+
+    /** @return matching patient (with password cleared) on success, otherwise null. */
+    public Patient authenticate(String username, String password) throws SQLException {
+        String sql = "SELECT " + COLS + " FROM Patient WHERE Username=? AND Password=?";
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, email);
+            ps.setString(1, username);
+            ps.setString(2, password);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? readRow(rs) : null;
+                if (!rs.next()) return null;
+                Patient p = readRow(rs);
+                p.setPassword(""); // do not retain credentials in session
+                return p;
             }
         }
     }
@@ -120,6 +174,16 @@ public class PatientDAO {
         return out;
     }
 
+    private Patient querySingle(String sql, String param) throws SQLException {
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, param);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? readRow(rs) : null;
+            }
+        }
+    }
+
     private void bind(PreparedStatement ps, Patient p) throws SQLException {
         ps.setString(1, p.getPatientId());
         ps.setString(2, p.getPatientName());
@@ -134,6 +198,8 @@ public class PatientDAO {
         ps.setString(11, p.getAddress());
         ps.setString(12, p.getContactNo());
         ps.setString(13, p.getAadharNumber());
+        ps.setString(14, p.getUsername());
+        ps.setString(15, p.getPassword());
     }
 
     private Patient readRow(ResultSet rs) throws SQLException {
@@ -151,6 +217,8 @@ public class PatientDAO {
         p.setAddress(rs.getString("Address"));
         p.setContactNo(rs.getString("ContactNo"));
         p.setAadharNumber(rs.getString("AadharNumber"));
+        p.setUsername(rs.getString("Username"));
+        p.setPassword(rs.getString("Password"));
         return p;
     }
 }

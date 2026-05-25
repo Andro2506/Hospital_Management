@@ -3,8 +3,13 @@ package com.hospital.model;
 /**
  * POJO representing a Patient.
  *
+ * <p>The Patient now also doubles as a self-service user (login). Patient
+ * accounts may be created by an admin (no Username/Password) or by the
+ * patient themselves through the public registration page (Username +
+ * Password set). Either way the row lives in the same Patient table.
+ *
  * Fields map to the Patient table:
- *   PatientId       - 7-digit registration number (PRN)
+ *   PatientId       - 7-digit registration number (PRN), also displayed as PRN
  *   PatientName     - max 50 chars
  *   Email
  *   Age
@@ -17,6 +22,8 @@ package com.hospital.model;
  *   Address         - max 100 chars
  *   ContactNo       - max 10 digits
  *   AadharNumber    - max 12 digits
+ *   Username        - alphanumeric login, min 8 chars (nullable when admin-created)
+ *   Password        - login password (nullable when admin-created)
  */
 public class Patient {
 
@@ -33,27 +40,10 @@ public class Patient {
     private String address;
     private String contactNo;
     private String aadharNumber;
+    private String username;
+    private String password;
 
     public Patient() { }
-
-    public Patient(String patientId, String patientName, String email, int age,
-                   String bloodGroup, String patientDOB, String gender,
-                   String wardNumber, String doctorId, String doctorName,
-                   String address, String contactNo, String aadharNumber) {
-        this.patientId = patientId;
-        this.patientName = patientName;
-        this.email = email;
-        this.age = age;
-        this.bloodGroup = bloodGroup;
-        this.patientDOB = patientDOB;
-        this.gender = gender;
-        this.wardNumber = wardNumber;
-        this.doctorId = doctorId;
-        this.doctorName = doctorName;
-        this.address = address;
-        this.contactNo = contactNo;
-        this.aadharNumber = aadharNumber;
-    }
 
     public String getPatientId() { return patientId; }
     public void setPatientId(String patientId) { this.patientId = patientId; }
@@ -93,6 +83,12 @@ public class Patient {
 
     public String getAadharNumber() { return aadharNumber; }
     public void setAadharNumber(String aadharNumber) { this.aadharNumber = aadharNumber; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     @Override
     public String toString() {
