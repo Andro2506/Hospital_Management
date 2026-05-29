@@ -24,6 +24,7 @@ Thumbs.db
 
 # Local helper folders
 .tmp/
+.build_ppt/
 
 # Downloaded JARs (the user must run download-deps.sh or fetch manually)
 HospitalManagementSystem/WebContent/WEB-INF/lib/*.jar
